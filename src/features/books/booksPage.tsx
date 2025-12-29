@@ -5,6 +5,7 @@ import BookForm from "./component/book/BookForm.tsx";
 import BookCard from "./component/book/BookCard.tsx";
 import Navbar from "../../shared/components/Navbar.tsx";
 import Button from "../../shared/components/Button.tsx";
+import Modal from "../../shared/components/Modal.tsx";
 import AddIcon from '@mui/icons-material/Add';
 
 type BooksPageProps = {
@@ -99,27 +100,35 @@ export default function BooksPage({ onBack }: BooksPageProps) {
             {error && <p className="status status--error">Error: {error}</p>}
 
             {/* CREATE */}
-            {showCreate && (
-                <section className="panel">
-                    <BookForm
-                        mode="create"
-                        onSubmit={handleCreate}
-                        onCancel={() => setShowCreate(false)}
-                    />
-                </section>
-            )}
+            <Modal
+                open={showCreate}
+                title="Tambah Buku"
+                onClose={() => setShowCreate(false)}
+            >
+                <BookForm
+                    mode="create"
+                    onSubmit={handleCreate}
+                    onCancel={() => setShowCreate(false)}
+                    showHeader={false}
+                />
+            </Modal>
 
             {/* EDIT */}
-            {editing && (
-                <section className="panel">
+            <Modal
+                open={Boolean(editing)}
+                title="Edit Buku"
+                onClose={() => setEditing(null)}
+            >
+                {editing && (
                     <BookForm
                         mode="edit"
                         initial={editing}
                         onSubmit={handleUpdate}
                         onCancel={() => setEditing(null)}
+                        showHeader={false}
                     />
-                </section>
-            )}
+                )}
+            </Modal>
 
             {!loading && !error && books.length === 0 && (
                 <div className="empty-card">

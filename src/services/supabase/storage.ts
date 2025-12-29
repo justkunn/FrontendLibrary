@@ -1,0 +1,36 @@
+import { SUPABASE_ANON_KEY, SUPABASE_BUCKET, SUPABASE_URL } from "../../shared/config/env";
+import { supabase } from "./client";
+
+type UploadResult = {
+    publicUrl: string;
+    path: string;
+};
+
+function assertSupabaseConfig() {
+    if (!SUPABASE_URL || !SUPABASE_ANON_KEY || !SUPABASE_BUCKET) {
+        throw new Error("Supabase config belum lengkap. Cek VITE_SUPABASE_URL/KEY/BUCKET.");
+    }
+}
+
+function buildCoverPath(file: File) {
+    const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "-");
+    const stamp = Date.now();
+    const random = Math.random().toString(36).slice(2, 8);
+    return `covers/${stamp}-${random}-${safeName}`;
+}
+
+export async function uploadCoverImage(file: File): Promise<UploadResult> {
+    assertSupabaseConfig();
+    const path = buildCoverPath(file);
+    const { error } = await supabase.storage.from(SUPABASE_BUCKET).upload(path, file, {
+        upsert: true,
+        contentType: file.type,
+    });
+
+    if (error) throw error;
+
+    const { data } = supabase.storage.from(SUPABASE_BUCKET).getPublicUrl(path);
+    if (!data?.publicUrl) throw new Error("Gagal mendapatkan public URL dari Supabase.");
+
+    return { publicUrl: data.publicUrl, path };
+}

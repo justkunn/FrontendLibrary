@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import type { Book, CreateBookDTO, UpdateBookDTO } from "../../../../services/library/book/books.type.ts";
+import { uploadCoverImage } from "../../../../services/supabase/storage.ts";
 import Button from "../../../../shared/components/Button.tsx";
 
 type BookFormProps =
@@ -8,22 +9,26 @@ type BookFormProps =
           initial?: Book;
           onSubmit: (payload: CreateBookDTO) => Promise<void>;
           onCancel?: () => void;
+          showHeader?: boolean;
       }
     | {
           mode: "edit";
           initial: Book;
           onSubmit: (payload: UpdateBookDTO) => Promise<void>;
           onCancel?: () => void;
+          showHeader?: boolean;
       };
 
-export default function BookForm({ mode, initial, onSubmit, onCancel }: BookFormProps) {
+export default function BookForm({ mode, initial, onSubmit, onCancel, showHeader = true }: BookFormProps) {
     const [bookName, setBookName] = useState("");
     const [totalPage, setTotalPage] = useState("");
     const [publisher, setPublisher] = useState("");
     const [author, setAuthor] = useState("");
     const [release, setRelease] = useState<number>(2025);
     const [stock, setStock] = useState<number>(0);
-    const [cover, setCover] = useState<string>("");
+    const [coverUrl, setCoverUrl] = useState<string>("");
+    const [coverFile, setCoverFile] = useState<File | null>(null);
+    const [uploading, setUploading] = useState(false);
 
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState("");
@@ -36,7 +41,8 @@ export default function BookForm({ mode, initial, onSubmit, onCancel }: BookForm
             setAuthor(initial.author ?? "");
             setRelease(initial.release_year ?? 2025);
             setStock(initial.stock ?? 0);
-            setCover(initial.cover ?? "");
+            setCoverUrl(initial.cover ?? "");
+            setCoverFile(null);
         }
     }, [mode, initial]);
 
@@ -50,6 +56,14 @@ export default function BookForm({ mode, initial, onSubmit, onCancel }: BookForm
             if (!author.trim()) throw new Error("Author wajib diisi.");
             if (!publisher.trim()) throw new Error("Publisher wajib diisi.");
 
+            let resolvedCover = coverUrl.trim();
+            if (coverFile) {
+                setUploading(true);
+                const { publicUrl } = await uploadCoverImage(coverFile);
+                resolvedCover = publicUrl;
+                setCoverUrl(publicUrl);
+            }
+
             if (mode === "create") {
                 const payload: CreateBookDTO = {
                     book_name: bookName,
@@ -58,7 +72,7 @@ export default function BookForm({ mode, initial, onSubmit, onCancel }: BookForm
                     author,
                     release_year :release,
                     stock,
-                    cover: cover || undefined,
+                    cover: resolvedCover || undefined,
                 };
                 await onSubmit(payload);
             } else {
@@ -69,7 +83,7 @@ export default function BookForm({ mode, initial, onSubmit, onCancel }: BookForm
                     author,
                     release_year : release,
                     stock,
-                    cover: cover || undefined,
+                    cover: resolvedCover || undefined,
                 };
                 await onSubmit(payload);
             }
@@ -77,17 +91,22 @@ export default function BookForm({ mode, initial, onSubmit, onCancel }: BookForm
             setError(e instanceof Error ? e.message : String(e));
         } finally {
             setSaving(false);
+            setUploading(false);
         }
     }
 
+    const busy = saving || uploading;
+
     return (
         <form onSubmit={handleSubmit} className="form">
-            <div className="form__header">
-                <h2 className="form__title">
-                    {mode === "create" ? "Tambah Buku" : "Edit Buku"}
-                </h2>
-                <p className="form__hint">Lengkapi detail buku agar siap tampil.</p>
-            </div>
+            {showHeader && (
+                <div className="form__header">
+                    <h2 className="form__title">
+                        {mode === "create" ? "Tambah Buku" : "Edit Buku"}
+                    </h2>
+                    <p className="form__hint">Lengkapi detail buku agar siap tampil.</p>
+                </div>
+            )}
 
             {error && <p className="form__error">Error: {error}</p>}
 
@@ -150,21 +169,28 @@ export default function BookForm({ mode, initial, onSubmit, onCancel }: BookForm
             </div>
 
             <label className="field">
-                <span>Cover (string/base64/url)</span>
+                <span>Cover (upload)</span>
                 <input
                     className="input"
-                    value={cover}
-                    onChange={(e) => setCover(e.target.value)}
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => setCoverFile(e.target.files?.[0] ?? null)}
                 />
+                {coverFile && (
+                    <span className="field__hint">Selected: {coverFile.name}</span>
+                )}
+                {coverUrl && !coverFile && (
+                    <span className="field__hint">Current URL: {coverUrl}</span>
+                )}
             </label>
 
             <div className="form__actions">
-                <Button variant="primary" type="submit" disabled={saving}>
-                    {saving ? "Menyimpan..." : mode === "create" ? "Create" : "Update"}
+                <Button variant="primary" type="submit" disabled={busy}>
+                    {uploading ? "Uploading..." : saving ? "Menyimpan..." : mode === "create" ? "Create" : "Update"}
                 </Button>
 
                 {onCancel && (
-                    <Button variant="ghost" type="button" onClick={onCancel} disabled={saving}>
+                    <Button variant="ghost" type="button" onClick={onCancel} disabled={busy}>
                         Cancel
                     </Button>
                 )}
