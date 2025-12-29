@@ -30,6 +30,7 @@ export async function uploadCoverImage(file: File): Promise<UploadResult> {
     if (error) throw error;
 
     const { data } = supabase.storage.from(SUPABASE_BUCKET).getPublicUrl(path);
+    console.info("[supabase] public url", data?.publicUrl ?? "(empty)");
     if (!data?.publicUrl) throw new Error("Gagal mendapatkan public URL dari Supabase.");
 
     return { publicUrl: data.publicUrl, path };
