@@ -21,6 +21,7 @@ function buildCoverPath(file: File) {
 
 export async function uploadCoverImage(file: File): Promise<UploadResult> {
     assertSupabaseConfig();
+    console.info("[supabase] upload start", { name: file.name, size: file.size, type: file.type });
     const path = buildCoverPath(file);
     const { error } = await supabase.storage.from(SUPABASE_BUCKET).upload(path, file, {
         upsert: true,
