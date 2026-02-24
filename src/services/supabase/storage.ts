@@ -57,4 +57,5 @@ export async function uploadCoverImage(file: File): Promise<UploadResult> {
 
 export async function uploadEmployeeImage(file: File): Promise<UploadResult> {
   return uploadImage(file, "employee");
+  
 }
