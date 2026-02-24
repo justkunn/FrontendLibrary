@@ -31,10 +31,12 @@ export default function ButtonAppBar({
           ></IconButton>
           <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
             <div>
-              <h1 className="page__title">{title}</h1>
+              <h1 className="text-[clamp(2.2rem,2.8vw,3.2rem)] leading-none text-[#b8b2b2]">
+                {title}
+              </h1>
             </div>
           </Typography>
-          <div className="page__actions">
+          <div className="flex flex-wrap gap-2.5">
             <Button variant="ghost" onClick={onRefresh} disabled={loading}>
               Refresh
             </Button>

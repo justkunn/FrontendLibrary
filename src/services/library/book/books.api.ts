@@ -2,8 +2,8 @@ import { apiGet, apiPost, apiPut, apiDelete } from "../../http/client.ts";
 import type { Book, CreateBookDTO, UpdateBookDTO } from "./books.type";
 
 // GET /books
-export function getBooks() {
-    return apiGet<Book[]>("/book/get/all");
+export function getBooks(page = 0) {
+    return apiGet<Book[]>(`/book/get/all?page=${page}`);
 }
 
 // GET /books/:id

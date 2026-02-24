@@ -98,69 +98,69 @@ export default function BookForm({ mode, initial, onSubmit, onCancel, showHeader
     const busy = saving || uploading;
 
     return (
-        <form onSubmit={handleSubmit} className="form">
+        <form onSubmit={handleSubmit} className="grid max-w-[640px] gap-3">
             {showHeader && (
-                <div className="form__header">
-                    <h2 className="form__title">
+                <div className="grid gap-1">
+                    <h2 className="text-xl font-semibold text-[#2f1f3a]">
                         {mode === "create" ? "Tambah Buku" : "Edit Buku"}
                     </h2>
-                    <p className="form__hint">Lengkapi detail buku agar siap tampil.</p>
+                    <p className="text-sm text-[#6b5a80]">Lengkapi detail buku agar siap tampil.</p>
                 </div>
             )}
 
-            {error && <p className="form__error">Error: {error}</p>}
+            {error && <p className="font-semibold text-[#a73c50]">Error: {error}</p>}
 
-            <label className="field">
+            <label className="grid gap-1.5 text-sm text-[#3e2f56]">
                 <span>Nama Buku</span>
                 <input
-                    className="input"
+                    className="w-full rounded-xl border border-[#6f5a8c]/20 bg-white/90 px-3 py-2 shadow-[inset_0_1px_2px_rgba(30,18,50,0.06)] focus:border-[#ff91c7]/70 focus:outline focus:outline-2 focus:outline-offset-1 focus:outline-[#ff91c7]/50"
                     value={bookName}
                     onChange={(e) => setBookName(e.target.value)}
                 />
             </label>
 
-            <label className="field">
+            <label className="grid gap-1.5 text-sm text-[#3e2f56]">
                 <span>Halaman (text)</span>
                 <input
-                    className="input"
+                    className="w-full rounded-xl border border-[#6f5a8c]/20 bg-white/90 px-3 py-2 shadow-[inset_0_1px_2px_rgba(30,18,50,0.06)] focus:border-[#ff91c7]/70 focus:outline focus:outline-2 focus:outline-offset-1 focus:outline-[#ff91c7]/50"
                     value={totalPage}
                     onChange={(e) => setTotalPage(e.target.value)}
                 />
             </label>
 
-            <label className="field">
+            <label className="grid gap-1.5 text-sm text-[#3e2f56]">
                 <span>Publisher</span>
                 <input
-                    className="input"
+                    className="w-full rounded-xl border border-[#6f5a8c]/20 bg-white/90 px-3 py-2 shadow-[inset_0_1px_2px_rgba(30,18,50,0.06)] focus:border-[#ff91c7]/70 focus:outline focus:outline-2 focus:outline-offset-1 focus:outline-[#ff91c7]/50"
                     value={publisher}
                     onChange={(e) => setPublisher(e.target.value)}
                 />
             </label>
 
-            <label className="field">
+            <label className="grid gap-1.5 text-sm text-[#3e2f56]">
                 <span>Author</span>
                 <input
-                    className="input"
+                    className="w-full rounded-xl border border-[#6f5a8c]/20 bg-white/90 px-3 py-2 shadow-[inset_0_1px_2px_rgba(30,18,50,0.06)] focus:border-[#ff91c7]/70 focus:outline focus:outline-2 focus:outline-offset-1 focus:outline-[#ff91c7]/50"
                     value={author}
                     onChange={(e) => setAuthor(e.target.value)}
                 />
             </label>
 
-            <div className="field-row">
-                <label className="field">
+            <div className="grid gap-3 [grid-template-columns:repeat(auto-fit,minmax(160px,1fr))]">
+                <label className="grid gap-1.5 text-sm text-[#3e2f56]">
                     <span>Release (tahun)</span>
                     <input
-                        className="input"
+                        className="w-full rounded-xl border border-[#6f5a8c]/20 bg-white/90 px-3 py-2 shadow-[inset_0_1px_2px_rgba(30,18,50,0.06)] focus:border-[#ff91c7]/70 focus:outline focus:outline-2 focus:outline-offset-1 focus:outline-[#ff91c7]/50"
                         type="number"
                         value={release}
                         onChange={(e) => setRelease(Number(e.target.value))}
                     />
                 </label>
 
-                <label className="field">
+                <label className="grid gap-1.5 text-sm text-[#3e2f56]">
                     <span>Stock</span>
                     <input
-                        className="input"
+                        className="w-full rounded-xl border border-[#6f5a8c]/20 bg-white/90 px-3 py-2 shadow-[inset_0_1px_2px_rgba(30,18,50,0.06)] focus:border-[#ff91c7]/70 focus:outline focus:outline-2 focus:outline-offset-1 focus:outline-[#ff91c7]/50"
                         type="number"
                         value={stock}
                         onChange={(e) => setStock(Number(e.target.value))}
@@ -168,23 +168,23 @@ export default function BookForm({ mode, initial, onSubmit, onCancel, showHeader
                 </label>
             </div>
 
-            <label className="field">
+            <label className="grid gap-1.5 text-sm text-[#3e2f56]">
                 <span>Cover (upload)</span>
                 <input
-                    className="input"
+                    className="w-full rounded-xl border border-[#6f5a8c]/20 bg-white/90 px-3 py-2 shadow-[inset_0_1px_2px_rgba(30,18,50,0.06)] focus:border-[#ff91c7]/70 focus:outline focus:outline-2 focus:outline-offset-1 focus:outline-[#ff91c7]/50"
                     type="file"
                     accept="image/*"
                     onChange={(e) => setCoverFile(e.target.files?.[0] ?? null)}
                 />
                 {coverFile && (
-                    <span className="field__hint">Selected: {coverFile.name}</span>
+                    <span className="text-xs text-[#6b5a80]">Selected: {coverFile.name}</span>
                 )}
                 {coverUrl && !coverFile && (
-                    <span className="field__hint">Current URL: {coverUrl}</span>
+                    <span className="text-xs text-[#6b5a80]">Current URL: {coverUrl}</span>
                 )}
             </label>
 
-            <div className="form__actions">
+            <div className="flex flex-wrap gap-2.5">
                 <Button variant="primary" type="submit" disabled={busy}>
                     {uploading ? "Uploading..." : saving ? "Menyimpan..." : mode === "create" ? "Create" : "Update"}
                 </Button>

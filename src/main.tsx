@@ -11,6 +11,9 @@ const theme = createTheme({
       default: "#4988C4",
     },
   },
+  typography: {
+    fontFamily: '"Patrick Hand", "Segoe UI", sans-serif',
+  },
 });
 
 createRoot(document.getElementById('root')!).render(

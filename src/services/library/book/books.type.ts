@@ -7,7 +7,7 @@ export type Book = {
     author: string;
     release_year: number;
     stock: number;
-    cover?: string; // asumsi backend kirim base64 / URL, bukan BYTEA mentah
+    cover?: string;
 };
 
 // Data saat create

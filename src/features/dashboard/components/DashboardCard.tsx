@@ -14,13 +14,13 @@ export default function DashboardCard({
   onClick,
 }: DashboardCardProps) {
   return (
-    <article className="feature-card">
-      <div className="feature-card__body">
-        <p className="feature-card__eyebrow">Feature</p>
-        <h2 className="feature-card__title">{title}</h2>
-        <p className="feature-card__description">{description}</p>
+    <article className="grid gap-5 rounded-[20px] border border-white/80 bg-white/85 p-6 shadow-[0_18px_40px_rgba(63,41,90,0.12)] animate-floatIn">
+      <div className="grid gap-2">
+        <p className="text-[11px] uppercase tracking-[0.2em] text-[#6b5a80]">Feature</p>
+        <h2 className="text-[1.6rem] font-semibold text-[#2f1f3a]">{title}</h2>
+        <p className="leading-relaxed text-[#4f4161]">{description}</p>
       </div>
-      <div className="feature-card__actions">
+      <div className="flex">
         <Button variant="primary" onClick={onClick}>
           {ctaLabel}
         </Button>

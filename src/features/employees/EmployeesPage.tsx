@@ -1,40 +1,33 @@
 import { useEffect, useState } from "react";
-import { createBook, deleteBook, getBooks, updateBook } from "../../services/library/book/books.api.ts";
-import type { Book, CreateBookDTO, UpdateBookDTO } from "../../services/library/book/books.type.ts";
-import BookForm from "./component/book/BookForm.tsx";
-import BookCard from "./component/book/BookCard.tsx";
+import AddIcon from "@mui/icons-material/Add";
+import { createEmployee, deleteEmployee, getEmployees, updateEmployee } from "../../services/library/employe/employees.api.ts";
+import type { CreateEmployeeDTO, Employee, UpdateEmployeeDTO } from "../../services/library/employe/employees.type.ts";
+import EmployeeCard from "./components/EmployeeCard.tsx";
+import EmployeeForm from "./components/EmployeeForm.tsx";
 import Navbar from "../../shared/components/Navbar.tsx";
 import Button from "../../shared/components/Button.tsx";
 import Modal from "../../shared/components/Modal.tsx";
-import AddIcon from '@mui/icons-material/Add';
 
-type BooksPageProps = {
+type EmployeesPageProps = {
     onBack?: () => void;
 };
 
-export default function BooksPage({ onBack }: BooksPageProps) {
-    const [books, setBooks] = useState<Book[]>([]);
+export default function EmployeesPage({ onBack }: EmployeesPageProps) {
+    const [employees, setEmployees] = useState<Employee[]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
     const [page, setPage] = useState(0);
     const pageSize = 6;
-    const hasNextPage = books.length === pageSize;
-
-    // mode UI
+    const hasNextPage = employees.length === pageSize;
     const [showCreate, setShowCreate] = useState(false);
-    const [editing, setEditing] = useState<Book | null>(null);
+    const [editing, setEditing] = useState<Employee | null>(null);
 
-    async function loadBooks(targetPage = page) {
+    async function loadEmployees(targetPage = page) {
         setLoading(true);
         setError("");
         try {
-            const data = await getBooks(targetPage);
-            console.info("[books] raw response", data);
-            const normalized = Array.isArray(data)
-                ? data
-                : (data as { data?: Book[] }).data ?? [];
-            console.info("[books] normalized", normalized);
-            setBooks(normalized);
+            const data = await getEmployees(targetPage);
+            setEmployees(data);
         } catch (e) {
             setError(e instanceof Error ? e.message : String(e));
         } finally {
@@ -43,29 +36,29 @@ export default function BooksPage({ onBack }: BooksPageProps) {
     }
 
     useEffect(() => {
-        loadBooks();
+        loadEmployees();
     }, [page]);
 
-    async function handleCreate(payload: CreateBookDTO) {
-        await createBook(payload);
+    async function handleCreate(payload: CreateEmployeeDTO) {
+        await createEmployee(payload);
         setShowCreate(false);
-        await loadBooks();
+        await loadEmployees();
     }
 
-    async function handleUpdate(payload: UpdateBookDTO) {
+    async function handleUpdate(payload: UpdateEmployeeDTO) {
         if (!editing) return;
-        await updateBook(editing.id_book, payload);
+        await updateEmployee(editing.id_employee, payload);
         setEditing(null);
-        await loadBooks();
+        await loadEmployees();
     }
 
-    async function handleDelete(id_book: number) {
-        const ok = confirm("Yakin mau hapus buku ini?");
+    async function handleDelete(employee: Employee) {
+        const ok = confirm("Yakin mau hapus employee ini?");
         if (!ok) return;
 
         try {
-            await deleteBook(id_book);
-            await loadBooks();
+            await deleteEmployee(employee.id_employee);
+            await loadEmployees();
         } catch (e) {
             alert(e instanceof Error ? e.message : String(e));
         }
@@ -78,11 +71,11 @@ export default function BooksPage({ onBack }: BooksPageProps) {
 
     return (
         <main className="relative z-10 mx-auto grid w-full max-w-[1080px] gap-6 px-4 pb-16 pt-9 sm:px-6 sm:pb-20 sm:pt-12">
-            <Navbar title="Books" />
+            <Navbar title="Employees" />
             <header className="flex flex-wrap items-end justify-between gap-4">
                 <div>
-                    <p className="text-[11px] uppercase tracking-[0.2em] text-[#8d7aa5]">Collections</p>
-                    <h2 className="mt-2 text-base text-[#5e4f73]">Kelola daftar buku dengan tampilan kartu.</h2>
+                    <p className="text-[11px] uppercase tracking-[0.2em] text-[#8d7aa5]">Staff</p>
+                    <h2 className="mt-2 text-base text-[#5e4f73]">Kelola data pegawai dengan tampilan kartu.</h2>
                 </div>
                 <div className="flex flex-wrap gap-2.5">
                     {onBack && (
@@ -90,7 +83,7 @@ export default function BooksPage({ onBack }: BooksPageProps) {
                             Dashboard
                         </Button>
                     )}
-                    <Button variant="ghost" onClick={loadBooks} disabled={loading}>
+                    <Button variant="ghost" onClick={loadEmployees} disabled={loading}>
                         Refresh
                     </Button>
                     <Button variant="primary" onClick={handleCreateClick} size="xs" className="rounded-full">
@@ -108,13 +101,12 @@ export default function BooksPage({ onBack }: BooksPageProps) {
                 </p>
             )}
 
-            {/* CREATE */}
             <Modal
                 open={showCreate}
-                title="Tambah Buku"
+                title="Tambah Employee"
                 onClose={() => setShowCreate(false)}
             >
-                <BookForm
+                <EmployeeForm
                     mode="create"
                     onSubmit={handleCreate}
                     onCancel={() => setShowCreate(false)}
@@ -122,14 +114,13 @@ export default function BooksPage({ onBack }: BooksPageProps) {
                 />
             </Modal>
 
-            {/* EDIT */}
             <Modal
                 open={Boolean(editing)}
-                title="Edit Buku"
+                title="Edit Employee"
                 onClose={() => setEditing(null)}
             >
                 {editing && (
-                    <BookForm
+                    <EmployeeForm
                         mode="edit"
                         initial={editing}
                         onSubmit={handleUpdate}
@@ -139,23 +130,23 @@ export default function BooksPage({ onBack }: BooksPageProps) {
                 )}
             </Modal>
 
-            {!loading && !error && books.length === 0 && (
+            {!loading && !error && employees.length === 0 && (
                 <div className="grid max-w-[320px] gap-3 rounded-2xl bg-white/70 p-5 text-[#5a4a6e]">
                     <p>Data kosong.</p>
                 </div>
             )}
 
-            {!loading && !error && books.length > 0 && (
+            {!loading && !error && employees.length > 0 && (
                 <section className="grid gap-5 [grid-template-columns:repeat(auto-fit,minmax(260px,1fr))]">
-                    {books.map((b) => (
-                        <BookCard
-                            key={b.id_book}
-                            book={b}
+                    {employees.map((employee) => (
+                        <EmployeeCard
+                            key={employee.id_employee}
+                            employee={employee}
                             onEdit={() => {
                                 setShowCreate(false);
-                                setEditing(b);
+                                setEditing(employee);
                             }}
-                            onDelete={() => handleDelete(b.id_book)}
+                            onDelete={() => handleDelete(employee)}
                         />
                     ))}
                 </section>

@@ -1,40 +1,33 @@
 import { useEffect, useState } from "react";
-import { createBook, deleteBook, getBooks, updateBook } from "../../services/library/book/books.api.ts";
-import type { Book, CreateBookDTO, UpdateBookDTO } from "../../services/library/book/books.type.ts";
-import BookForm from "./component/book/BookForm.tsx";
-import BookCard from "./component/book/BookCard.tsx";
+import AddIcon from "@mui/icons-material/Add";
+import { createMember, deleteMember, getMembers, updateMember } from "../../services/library/member/members.api.ts";
+import type { CreateMemberDTO, Member, UpdateMemberDTO } from "../../services/library/member/members.type.ts";
+import MemberCard from "./components/MemberCard.tsx";
+import MemberForm from "./components/MemberForm.tsx";
 import Navbar from "../../shared/components/Navbar.tsx";
 import Button from "../../shared/components/Button.tsx";
 import Modal from "../../shared/components/Modal.tsx";
-import AddIcon from '@mui/icons-material/Add';
 
-type BooksPageProps = {
+type MembersPageProps = {
     onBack?: () => void;
 };
 
-export default function BooksPage({ onBack }: BooksPageProps) {
-    const [books, setBooks] = useState<Book[]>([]);
+export default function MembersPage({ onBack }: MembersPageProps) {
+    const [members, setMembers] = useState<Member[]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
     const [page, setPage] = useState(0);
     const pageSize = 6;
-    const hasNextPage = books.length === pageSize;
-
-    // mode UI
+    const hasNextPage = members.length === pageSize;
     const [showCreate, setShowCreate] = useState(false);
-    const [editing, setEditing] = useState<Book | null>(null);
+    const [editing, setEditing] = useState<Member | null>(null);
 
-    async function loadBooks(targetPage = page) {
+    async function loadMembers(targetPage = page) {
         setLoading(true);
         setError("");
         try {
-            const data = await getBooks(targetPage);
-            console.info("[books] raw response", data);
-            const normalized = Array.isArray(data)
-                ? data
-                : (data as { data?: Book[] }).data ?? [];
-            console.info("[books] normalized", normalized);
-            setBooks(normalized);
+            const data = await getMembers(targetPage);
+            setMembers(data);
         } catch (e) {
             setError(e instanceof Error ? e.message : String(e));
         } finally {
@@ -43,29 +36,29 @@ export default function BooksPage({ onBack }: BooksPageProps) {
     }
 
     useEffect(() => {
-        loadBooks();
+        loadMembers();
     }, [page]);
 
-    async function handleCreate(payload: CreateBookDTO) {
-        await createBook(payload);
+    async function handleCreate(payload: CreateMemberDTO) {
+        await createMember(payload);
         setShowCreate(false);
-        await loadBooks();
+        await loadMembers();
     }
 
-    async function handleUpdate(payload: UpdateBookDTO) {
+    async function handleUpdate(payload: UpdateMemberDTO) {
         if (!editing) return;
-        await updateBook(editing.id_book, payload);
+        await updateMember(editing.id_member, payload);
         setEditing(null);
-        await loadBooks();
+        await loadMembers();
     }
 
-    async function handleDelete(id_book: number) {
-        const ok = confirm("Yakin mau hapus buku ini?");
+    async function handleDelete(member: Member) {
+        const ok = confirm("Yakin mau hapus member ini?");
         if (!ok) return;
 
         try {
-            await deleteBook(id_book);
-            await loadBooks();
+            await deleteMember(member.id_member);
+            await loadMembers();
         } catch (e) {
             alert(e instanceof Error ? e.message : String(e));
         }
@@ -78,11 +71,11 @@ export default function BooksPage({ onBack }: BooksPageProps) {
 
     return (
         <main className="relative z-10 mx-auto grid w-full max-w-[1080px] gap-6 px-4 pb-16 pt-9 sm:px-6 sm:pb-20 sm:pt-12">
-            <Navbar title="Books" />
+            <Navbar title="Members" />
             <header className="flex flex-wrap items-end justify-between gap-4">
                 <div>
-                    <p className="text-[11px] uppercase tracking-[0.2em] text-[#8d7aa5]">Collections</p>
-                    <h2 className="mt-2 text-base text-[#5e4f73]">Kelola daftar buku dengan tampilan kartu.</h2>
+                    <p className="text-[11px] uppercase tracking-[0.2em] text-[#8d7aa5]">Community</p>
+                    <h2 className="mt-2 text-base text-[#5e4f73]">Kelola data member dengan tampilan kartu.</h2>
                 </div>
                 <div className="flex flex-wrap gap-2.5">
                     {onBack && (
@@ -90,7 +83,7 @@ export default function BooksPage({ onBack }: BooksPageProps) {
                             Dashboard
                         </Button>
                     )}
-                    <Button variant="ghost" onClick={loadBooks} disabled={loading}>
+                    <Button variant="ghost" onClick={loadMembers} disabled={loading}>
                         Refresh
                     </Button>
                     <Button variant="primary" onClick={handleCreateClick} size="xs" className="rounded-full">
@@ -108,13 +101,12 @@ export default function BooksPage({ onBack }: BooksPageProps) {
                 </p>
             )}
 
-            {/* CREATE */}
             <Modal
                 open={showCreate}
-                title="Tambah Buku"
+                title="Tambah Member"
                 onClose={() => setShowCreate(false)}
             >
-                <BookForm
+                <MemberForm
                     mode="create"
                     onSubmit={handleCreate}
                     onCancel={() => setShowCreate(false)}
@@ -122,14 +114,13 @@ export default function BooksPage({ onBack }: BooksPageProps) {
                 />
             </Modal>
 
-            {/* EDIT */}
             <Modal
                 open={Boolean(editing)}
-                title="Edit Buku"
+                title="Edit Member"
                 onClose={() => setEditing(null)}
             >
                 {editing && (
-                    <BookForm
+                    <MemberForm
                         mode="edit"
                         initial={editing}
                         onSubmit={handleUpdate}
@@ -139,23 +130,23 @@ export default function BooksPage({ onBack }: BooksPageProps) {
                 )}
             </Modal>
 
-            {!loading && !error && books.length === 0 && (
+            {!loading && !error && members.length === 0 && (
                 <div className="grid max-w-[320px] gap-3 rounded-2xl bg-white/70 p-5 text-[#5a4a6e]">
                     <p>Data kosong.</p>
                 </div>
             )}
 
-            {!loading && !error && books.length > 0 && (
+            {!loading && !error && members.length > 0 && (
                 <section className="grid gap-5 [grid-template-columns:repeat(auto-fit,minmax(260px,1fr))]">
-                    {books.map((b) => (
-                        <BookCard
-                            key={b.id_book}
-                            book={b}
+                    {members.map((member) => (
+                        <MemberCard
+                            key={member.id_member}
+                            member={member}
                             onEdit={() => {
                                 setShowCreate(false);
-                                setEditing(b);
+                                setEditing(member);
                             }}
-                            onDelete={() => handleDelete(b.id_book)}
+                            onDelete={() => handleDelete(member)}
                         />
                     ))}
                 </section>

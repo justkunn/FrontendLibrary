@@ -20,11 +20,13 @@ export default function Navbar({ title, actions }: NavbarProps) {
           backdropFilter: "blur(6px)",
         }}
       >
-        <Toolbar className="navbar">
+        <Toolbar className="py-2">
           <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-            <h1 className="page__title">{title}</h1>
+            <h1 className="text-[clamp(2.2rem,2.8vw,3.2rem)] leading-none text-[#b8b2b2]">
+              {title}
+            </h1>
           </Typography>
-          {actions && <div className="page__actions">{actions}</div>}
+          {actions && <div className="flex flex-wrap gap-2.5">{actions}</div>}
         </Toolbar>
       </AppBar>
     </Box>

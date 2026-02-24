@@ -18,21 +18,22 @@ function assertSupabaseConfig() {
   }
 }
 
-function buildCoverPath(file: File) {
+function buildCoverPath(file: File, folder = "covers") {
   const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "-");
   const stamp = Date.now();
   const random = Math.random().toString(36).slice(2, 8);
-  return `covers/${stamp}-${random}-${safeName}`;
+  return `${folder}/${stamp}-${random}-${safeName}`;
 }
 
-export async function uploadCoverImage(file: File): Promise<UploadResult> {
+async function uploadImage(file: File, folder: string): Promise<UploadResult> {
   assertSupabaseConfig();
   console.info("[supabase] upload start", {
     name: file.name,
     size: file.size,
     type: file.type,
+    folder,
   });
-  const path = buildCoverPath(file);
+  const path = buildCoverPath(file, folder);
   const { error } = await supabase.storage
     .from(SUPABASE_BUCKET)
     .upload(path, file, {
@@ -48,4 +49,12 @@ export async function uploadCoverImage(file: File): Promise<UploadResult> {
     throw new Error("Gagal mendapatkan public URL dari Supabase.");
 
   return { publicUrl: data.publicUrl, path };
+}
+
+export async function uploadCoverImage(file: File): Promise<UploadResult> {
+  return uploadImage(file, "covers");
+}
+
+export async function uploadEmployeeImage(file: File): Promise<UploadResult> {
+  return uploadImage(file, "employee");
 }
